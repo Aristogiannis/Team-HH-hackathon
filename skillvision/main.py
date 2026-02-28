@@ -99,7 +99,6 @@ async def websocket_session(
         return
 
     await websocket.send_json({"type": "connected"})
-    done = asyncio.Event()
 
     async def browser_to_gemini():
         """Relay messages from browser to Gemini."""
@@ -110,23 +109,26 @@ async def websocket_session(
                 msg_type = msg.get("type")
 
                 if msg_type == "video":
-                    jpeg_bytes = base64.b64decode(msg.get("data", ""))
-                    await gemini.send_video_frame(jpeg_bytes)
+                    await gemini.send_video_frame(
+                        base64.b64decode(msg.get("data", ""))
+                    )
+                elif msg_type == "audio":
+                    await gemini.send_audio_chunk(
+                        base64.b64decode(msg.get("data", ""))
+                    )
                 elif msg_type == "text":
                     await gemini.send_text(msg.get("data", ""))
         except WebSocketDisconnect:
             logger.info("Browser disconnected")
+        except asyncio.CancelledError:
+            raise
         except Exception as e:
             logger.error("browser_to_gemini error: %s", e)
-        finally:
-            done.set()
 
     async def gemini_to_browser():
         """Relay responses from Gemini to browser."""
         try:
             async for response in gemini.receive_responses():
-                if done.is_set():
-                    break
                 if response["type"] == "audio":
                     await websocket.send_bytes(response["data"])
                 elif response["type"] == "transcript":
@@ -139,18 +141,36 @@ async def websocket_session(
                     await websocket.send_json({"type": "turn_complete"})
                 elif response["type"] == "go_away":
                     await websocket.send_json({"type": "reconnecting"})
+                elif response["type"] == "error":
+                    await websocket.send_json(
+                        {"type": "error", "message": response["message"]}
+                    )
         except WebSocketDisconnect:
             logger.info("Browser disconnected during receive")
+        except asyncio.CancelledError:
+            raise
         except Exception as e:
-            if not done.is_set():
-                logger.error("gemini_to_browser error: %s", e)
-        finally:
-            done.set()
+            logger.error("gemini_to_browser error: %s", e)
+            try:
+                await websocket.send_json(
+                    {"type": "error", "message": str(e)}
+                )
+            except Exception:
+                pass
+
+    b2g = asyncio.create_task(browser_to_gemini())
+    g2b = asyncio.create_task(gemini_to_browser())
 
     try:
-        await asyncio.gather(browser_to_gemini(), gemini_to_browser())
-    except Exception as e:
-        logger.error("Session error: %s", e)
+        finished, pending = await asyncio.wait(
+            [b2g, g2b], return_when=asyncio.FIRST_COMPLETED
+        )
+        for task in pending:
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
     finally:
         await gemini.close()
         logger.info("Session cleaned up")

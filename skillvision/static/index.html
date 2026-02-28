@@ -229,6 +229,18 @@ body {
   color: #ff6b6b;
 }
 
+#mic-btn.active {
+  background: #3a1111;
+  border-color: #ff4444;
+  color: #ff4444;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
 #status-bar {
   display: flex;
   justify-content: space-between;
@@ -289,6 +301,7 @@ body {
     <div id="controls">
       <input type="text" id="text-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendText()">
       <button class="ctrl-btn" onclick="sendText()">Send</button>
+      <button class="ctrl-btn" id="mic-btn" onclick="toggleMic()">Mic</button>
       <button class="ctrl-btn" id="end-btn" onclick="stopSession()">End</button>
     </div>
     <div id="status-bar">
@@ -307,6 +320,10 @@ let nextPlayTime = 0;
 let selectedTaskId = '';
 let sopId = '';
 let timerInterval = null;
+let micStream = null;
+let micAudioCtx = null;
+let micProcessor = null;
+let micActive = false;
 let sessionStart = 0;
 
 // --- Setup: Load task templates ---
@@ -374,19 +391,19 @@ function stopCamera() {
   }
 }
 
-// --- Frame Capture (1 FPS) ---
+// --- Frame Capture (1 frame every 3 seconds to conserve tokens) ---
 function startFrameCapture() {
   const video = document.getElementById('camera');
   const canvas = document.getElementById('capture-canvas');
-  canvas.width = 768;
-  canvas.height = 768;
+  canvas.width = 512;
+  canvas.height = 512;
   const ctx = canvas.getContext('2d');
 
   frameInterval = setInterval(() => {
     if (!ws || ws.readyState !== WebSocket.OPEN) return;
     if (video.readyState < 2) return; // not ready yet
 
-    ctx.drawImage(video, 0, 0, 768, 768);
+    ctx.drawImage(video, 0, 0, 512, 512);
     canvas.toBlob(blob => {
       if (!blob || !ws || ws.readyState !== WebSocket.OPEN) return;
       const reader = new FileReader();
@@ -395,12 +412,69 @@ function startFrameCapture() {
         ws.send(JSON.stringify({ type: 'video', data: base64 }));
       };
       reader.readAsDataURL(blob);
-    }, 'image/jpeg', 0.8);
-  }, 1000);
+    }, 'image/jpeg', 0.5);
+  }, 3000);
 }
 
 function stopFrameCapture() {
   if (frameInterval) { clearInterval(frameInterval); frameInterval = null; }
+}
+
+// --- Microphone Capture (16kHz 16-bit PCM) ---
+async function startMic() {
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        channelCount: 1,
+        sampleRate: { ideal: 16000 },
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      }
+    });
+  } catch (e) {
+    alert('Microphone access denied. Please allow microphone permissions.');
+    return false;
+  }
+
+  micAudioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+  const source = micAudioCtx.createMediaStreamSource(micStream);
+  micProcessor = micAudioCtx.createScriptProcessor(4096, 1, 1);
+
+  micProcessor.onaudioprocess = (e) => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    const float32 = e.inputBuffer.getChannelData(0);
+    const int16 = new Int16Array(float32.length);
+    for (let i = 0; i < float32.length; i++) {
+      int16[i] = Math.max(-32768, Math.min(32767, Math.floor(float32[i] * 32768)));
+    }
+    const bytes = new Uint8Array(int16.buffer);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    ws.send(JSON.stringify({ type: 'audio', data: btoa(binary) }));
+  };
+
+  source.connect(micProcessor);
+  micProcessor.connect(micAudioCtx.destination);
+  micActive = true;
+  return true;
+}
+
+function stopMic() {
+  micActive = false;
+  if (micProcessor) { micProcessor.disconnect(); micProcessor = null; }
+  if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+  if (micAudioCtx) { micAudioCtx.close(); micAudioCtx = null; }
+  document.getElementById('mic-btn').classList.remove('active');
+}
+
+async function toggleMic() {
+  if (micActive) {
+    stopMic();
+  } else {
+    const ok = await startMic();
+    if (ok) document.getElementById('mic-btn').classList.add('active');
+  }
 }
 
 // --- WebSocket ---
@@ -573,6 +647,7 @@ async function startSession() {
 
 function stopSession() {
   sessionActive = false;
+  stopMic();
   stopFrameCapture();
   stopCamera();
   if (ws) { ws.onclose = null; ws.close(); ws = null; }

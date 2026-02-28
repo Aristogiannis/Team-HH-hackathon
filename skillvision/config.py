@@ -35,13 +35,13 @@ def load_settings() -> Settings:
             "GEMINI_MODEL", "gemini-2.5-flash-native-audio-preview-12-2025"
         ),
         voice_name=os.environ.get("VOICE_NAME", "Kore"),
-        frame_rate=float(os.environ.get("FRAME_RATE", "1.0")),
-        frame_resolution=int(os.environ.get("FRAME_RESOLUTION", "768")),
+        frame_rate=float(os.environ.get("FRAME_RATE", "0.33")),
+        frame_resolution=int(os.environ.get("FRAME_RESOLUTION", "512")),
         compression_trigger_tokens=int(
-            os.environ.get("COMPRESSION_TRIGGER_TOKENS", "25600")
+            os.environ.get("COMPRESSION_TRIGGER_TOKENS", "51200")
         ),
         compression_target_tokens=int(
-            os.environ.get("COMPRESSION_TARGET_TOKENS", "12800")
+            os.environ.get("COMPRESSION_TARGET_TOKENS", "25600")
         ),
         host=os.environ.get("HOST", "0.0.0.0"),
         port=int(os.environ.get("PORT", "8000")),

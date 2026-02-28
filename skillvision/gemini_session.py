@@ -69,6 +69,13 @@ class GeminiLiveSession:
             video=types.Blob(data=jpeg_bytes, mime_type="image/jpeg")
         )
 
+    async def send_audio_chunk(self, audio_bytes: bytes) -> None:
+        if not self._session or not self._is_connected:
+            return
+        await self._session.send_realtime_input(
+            audio=types.Blob(data=audio_bytes, mime_type="audio/pcm;rate=16000")
+        )
+
     async def send_text(self, text: str) -> None:
         if not self._session or not self._is_connected:
             return
@@ -89,6 +96,7 @@ class GeminiLiveSession:
           - interrupted:    {"type": "interrupted"}
           - turn_complete:  {"type": "turn_complete"}
           - go_away:        {"type": "go_away"}
+          - error:          {"type": "error", "message": str}
         """
         while self._is_connected and self._session:
             try:
@@ -140,6 +148,7 @@ class GeminiLiveSession:
                     # Iterator exhausted without GoAway — connection dropped
                     if self._can_reconnect():
                         logger.warning("Receive ended unexpectedly, reconnecting")
+                        yield {"type": "go_away"}
                         await self._reconnect()
                         continue
                     break
@@ -147,14 +156,15 @@ class GeminiLiveSession:
             except Exception as e:
                 logger.error("Receive error: %s", e)
                 if self._can_reconnect():
+                    yield {"type": "go_away"}
                     await self._reconnect()
                     continue
+                yield {"type": "error", "message": f"Connection lost: {e}"}
                 break
 
     def _can_reconnect(self) -> bool:
         return (
             self._is_connected
-            and self._resumption_handle is not None
             and self._reconnect_attempts < self._max_reconnect_attempts
         )
 
