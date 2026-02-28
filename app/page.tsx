@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { searchTaskDocs } from "../lib/search-tasks";
 
 type RealtimeEvent = {
   type: string;
@@ -15,6 +16,9 @@ export default function Home() {
   const [transcript, setTranscript] = useState("");
   const [aiResponse, setAiResponse] = useState("");
   const [events, setEvents] = useState<RealtimeEvent[]>([]);
+  const [isMuted, setIsMuted] = useState(false);
+  const [textInput, setTextInput] = useState("");
+  const [toolCall, setToolCall] = useState<string | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -113,6 +117,34 @@ export default function Home() {
     }
   }, []);
 
+  // Toggle microphone mute
+  const toggleMute = useCallback(() => {
+    const stream = localStreamRef.current;
+    if (!stream) return;
+    const audioTrack = stream.getAudioTracks()[0];
+    if (!audioTrack) return;
+    audioTrack.enabled = !audioTrack.enabled;
+    setIsMuted(!audioTrack.enabled);
+  }, []);
+
+  // Send a text message via the data channel
+  const sendText = useCallback((text: string) => {
+    const dc = dcRef.current;
+    if (!dc || dc.readyState !== "open" || !text.trim()) return;
+    dc.send(
+      JSON.stringify({
+        type: "conversation.item.create",
+        item: {
+          type: "message",
+          role: "user",
+          content: [{ type: "input_text", text: text.trim() }],
+        },
+      }),
+    );
+    dc.send(JSON.stringify({ type: "response.create" }));
+    setTextInput("");
+  }, []);
+
   // Clean up everything
   const cleanup = useCallback(() => {
     stopSnapshotLoop();
@@ -158,6 +190,7 @@ export default function Home() {
     setTranscript("");
     setAiResponse("");
     setEvents([]);
+    setIsMuted(false);
     setStatus("Requesting camera & mic...");
 
     try {
@@ -255,6 +288,45 @@ export default function Home() {
           if (event.type === "response.audio_transcript.done") {
             const t = (event.transcript as string) || "";
             if (t.trim()) setAiResponse(t);
+          }
+
+          // Handle function calls
+          if (event.type === "response.function_call_arguments.done") {
+            const {
+              name,
+              call_id: callId,
+              arguments: argsStr,
+            } = event as RealtimeEvent & {
+              name: string;
+              call_id: string;
+              arguments: string;
+            };
+
+            if (name === "get_task_steps") {
+              setToolCall("Looking up task instructions...");
+              try {
+                const args = JSON.parse(argsStr);
+                const result = searchTaskDocs(args.task_description);
+
+                dc.send(
+                  JSON.stringify({
+                    type: "conversation.item.create",
+                    item: {
+                      type: "function_call_output",
+                      call_id: callId,
+                      output: JSON.stringify(result),
+                    },
+                  }),
+                );
+
+                // Trigger model to continue speaking with the result
+                dc.send(JSON.stringify({ type: "response.create" }));
+              } catch (err) {
+                console.error("[realtime] Function call error:", err);
+              } finally {
+                setTimeout(() => setToolCall(null), 2000);
+              }
+            }
           }
 
           // Log errors
@@ -367,6 +439,13 @@ export default function Home() {
             {status}
           </span>
         </div>
+        {toolCall && (
+          <div className="absolute bottom-3 left-3">
+            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium backdrop-blur-sm bg-purple-500/20 text-purple-300 border border-purple-500/30 animate-pulse">
+              {toolCall}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Controls */}
@@ -380,14 +459,52 @@ export default function Home() {
             {isConnecting ? "Connecting..." : "Start Session"}
           </button>
         ) : (
-          <button
-            onClick={stopSession}
-            className="flex-1 h-12 rounded-xl bg-red-600 hover:bg-red-500 text-white font-semibold transition-colors text-sm"
-          >
-            Stop Session
-          </button>
+          <>
+            <button
+              onClick={stopSession}
+              className="flex-1 h-12 rounded-xl bg-red-600 hover:bg-red-500 text-white font-semibold transition-colors text-sm"
+            >
+              Stop Session
+            </button>
+            <button
+              onClick={toggleMute}
+              className={`h-12 px-4 rounded-xl font-semibold transition-colors text-sm ${
+                isMuted
+                  ? "bg-yellow-600 hover:bg-yellow-500 text-white"
+                  : "bg-zinc-700 hover:bg-zinc-600 text-zinc-200"
+              }`}
+            >
+              {isMuted ? "Unmute" : "Mute"}
+            </button>
+          </>
         )}
       </div>
+
+      {/* Text input */}
+      {isActive && (
+        <div className="w-full max-w-2xl flex gap-3">
+          <input
+            type="text"
+            value={textInput}
+            onChange={(e) => setTextInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendText(textInput);
+              }
+            }}
+            placeholder="Type a message..."
+            className="flex-1 h-12 rounded-xl bg-zinc-900 border border-zinc-700 px-4 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-500 transition-colors"
+          />
+          <button
+            onClick={() => sendText(textInput)}
+            disabled={!textInput.trim()}
+            className="h-12 px-5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 disabled:text-zinc-500 text-white font-semibold transition-colors text-sm"
+          >
+            Send
+          </button>
+        </div>
+      )}
 
       {/* Error display */}
       {error && (
