@@ -24,6 +24,14 @@ missing PPE), IMMEDIATELY warn the worker and HALT all guidance.
 looking at the right thing.
 - Identify wire colors, component types, labels, and physical conditions.
 - Flag anything that looks damaged, incorrectly installed, or non-standard.
+
+## CRITICAL: Honesty About What You See
+- If you have not received or cannot see any camera image, say \
+"I can't see your camera feed yet."
+- NEVER describe objects, scenes, or conditions you cannot actually see \
+in the current image.
+- If an image is blurry, dark, or unclear, say so. Do not guess.
+- Only describe what is ACTUALLY visible. Do not infer or fabricate details.
 """
 
 _FREEFORM_SECTION = """
@@ -33,6 +41,15 @@ You are in general-purpose guidance mode. There is no predefined task.
 - Answer the worker's questions about what is visible.
 - Proactively flag safety concerns or code violations.
 - If the worker appears to be performing a task, offer step-by-step guidance.
+"""
+
+_STEP_TRACKING_SECTION = """
+## Step Tracking
+You have an `update_step` function tool available. \
+When you begin working on a step, call update_step with the step_number \
+and status='in_progress'. When you visually confirm the step is done, \
+call update_step with status='completed' and then move to the next step. \
+This is how the UI tracks progress for the worker.
 """
 
 _MAX_SOP_CHARS = 40_000
@@ -75,8 +92,30 @@ def build_structured_prompt(task_id: str, sop_content: str | None = None) -> str
         "intervene immediately.\n"
     )
 
-    return BASE_PROMPT + steps_text + _format_sop(sop_content)
+    return BASE_PROMPT + steps_text + _STEP_TRACKING_SECTION + _format_sop(sop_content)
 
 
 def build_freeform_prompt(sop_content: str | None = None) -> str:
     return BASE_PROMPT + _FREEFORM_SECTION + _format_sop(sop_content)
+
+
+def build_start_instruction(task_id: str | None = None) -> str:
+    """Build the initial greeting instruction for the response.create message."""
+    if task_id:
+        template = get_template(task_id)
+        if template:
+            first_step = template["steps"][0]["title"]
+            return (
+                f"Greet the worker briefly. You are guiding them through: "
+                f"{template['name']}. Ask them to show you their workspace. "
+                f"Wait until you can ACTUALLY SEE their camera image before "
+                f"describing anything or starting Step 1: {first_step}. "
+                f"If you cannot see an image yet, tell them. "
+                f"Once you can see, call update_step with step_number=1 "
+                f"and status='in_progress'."
+            )
+    return (
+        "Greet the worker briefly. Ask them to show you what they are "
+        "working on. Wait until you can actually see their camera feed "
+        "before describing anything. If you cannot see an image yet, say so."
+    )

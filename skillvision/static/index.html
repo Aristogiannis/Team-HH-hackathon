@@ -29,223 +29,91 @@ body {
   background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
 }
 
-#setup-screen h1 {
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-}
+#setup-screen h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+#setup-screen p { color: #888; font-size: 14px; text-align: center; max-width: 300px; }
 
-#setup-screen p {
-  color: #888;
-  font-size: 14px;
-  text-align: center;
-  max-width: 300px;
-}
-
-.mode-section {
-  width: 100%;
-  max-width: 340px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.mode-section h3 {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #666;
-}
+.mode-section { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 10px; }
+.mode-section h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; }
 
 .mode-btn {
-  display: block;
-  width: 100%;
-  padding: 14px 16px;
-  border: 1px solid #333;
-  border-radius: 10px;
-  background: #111;
-  color: #fff;
-  font-size: 15px;
-  text-align: left;
-  cursor: pointer;
+  display: block; width: 100%; padding: 14px 16px;
+  border: 1px solid #333; border-radius: 10px; background: #111;
+  color: #fff; font-size: 15px; text-align: left; cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
 }
-
 .mode-btn:active { background: #222; }
 .mode-btn.selected { border-color: #4a9eff; background: #0d1b2a; }
+.mode-btn .desc { display: block; font-size: 12px; color: #888; margin-top: 4px; }
 
-.mode-btn .desc {
-  display: block;
-  font-size: 12px;
-  color: #888;
-  margin-top: 4px;
-}
-
-.sop-section {
-  width: 100%;
-  max-width: 340px;
-}
-
-.sop-section label {
-  display: block;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #666;
-  margin-bottom: 8px;
-}
-
-.file-input-wrap {
-  display: flex;
-  gap: 8px;
-}
-
-.file-input-wrap input[type="file"] {
-  flex: 1;
-  font-size: 13px;
-  color: #aaa;
-}
-
-.file-input-wrap button {
-  padding: 8px 14px;
-  border: 1px solid #333;
-  border-radius: 8px;
-  background: #222;
-  color: #fff;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-#sop-status {
-  font-size: 12px;
-  color: #4a9eff;
-  margin-top: 6px;
-  min-height: 18px;
-}
+.sop-section { width: 100%; max-width: 340px; }
+.sop-section label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 8px; }
+.file-input-wrap { display: flex; gap: 8px; }
+.file-input-wrap input[type="file"] { flex: 1; font-size: 13px; color: #aaa; }
+.file-input-wrap button { padding: 8px 14px; border: 1px solid #333; border-radius: 8px; background: #222; color: #fff; font-size: 13px; cursor: pointer; }
+#sop-status { font-size: 12px; color: #4a9eff; margin-top: 6px; min-height: 18px; }
 
 #start-btn {
-  width: 100%;
-  max-width: 340px;
-  padding: 16px;
-  border: none;
-  border-radius: 12px;
-  background: #4a9eff;
-  color: #fff;
-  font-size: 17px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 10px;
-  transition: opacity 0.2s;
+  width: 100%; max-width: 340px; padding: 16px; border: none; border-radius: 12px;
+  background: #4a9eff; color: #fff; font-size: 17px; font-weight: 600;
+  cursor: pointer; margin-top: 10px; transition: opacity 0.2s;
 }
-
 #start-btn:active { opacity: 0.8; }
 #start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* --- Session Screen --- */
-#session-screen {
-  display: none;
-  flex-direction: column;
-  height: 100dvh;
-}
+#session-screen { display: none; flex-direction: column; height: 100dvh; }
 
-#viewfinder {
-  flex: 7;
-  position: relative;
-  background: #000;
-  overflow: hidden;
-}
-
-#viewfinder video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+#viewfinder { flex: 7; position: relative; background: #000; overflow: hidden; }
+#viewfinder video { width: 100%; height: 100%; object-fit: cover; }
 
 #guidance-panel {
-  flex: 3;
-  display: flex;
-  flex-direction: column;
-  background: #111;
-  border-top: 1px solid #222;
-  min-height: 0;
+  flex: 3; display: flex; flex-direction: column;
+  background: #111; border-top: 1px solid #222; min-height: 0;
 }
 
 #step-indicator {
-  padding: 8px 12px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #4a9eff;
-  border-bottom: 1px solid #222;
-  flex-shrink: 0;
+  padding: 8px 12px; font-size: 13px; font-weight: 600;
+  color: #4a9eff; border-bottom: 1px solid #222; flex-shrink: 0;
 }
 
-#transcript {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px 12px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #ccc;
-  white-space: pre-wrap;
-  word-wrap: break-word;
+#log {
+  flex: 1; overflow-y: auto; padding: 10px 12px;
+  font-size: 14px; line-height: 1.5; color: #ccc;
   -webkit-overflow-scrolling: touch;
+  display: flex; flex-direction: column;
 }
+
+.log-message { margin-bottom: 5px; white-space: pre-wrap; word-wrap: break-word; }
+
+#inputContainer { margin-top: auto; display: flex; align-items: center; gap: 6px; }
 
 #controls {
-  display: flex;
-  gap: 6px;
-  padding: 8px;
-  border-top: 1px solid #222;
-  flex-shrink: 0;
+  display: flex; gap: 6px; padding: 8px;
+  border-top: 1px solid #222; flex-shrink: 0;
 }
 
-#text-input {
-  flex: 1;
-  padding: 10px 12px;
-  border: 1px solid #333;
-  border-radius: 8px;
-  background: #1a1a1a;
-  color: #fff;
-  font-size: 14px;
-  outline: none;
+#textInput {
+  flex: 1; padding: 10px 12px; border: 1px solid #333; border-radius: 8px;
+  background: #1a1a1a; color: #fff; font-size: 14px; outline: none;
 }
-
-#text-input:focus { border-color: #4a9eff; }
+#textInput:focus { border-color: #4a9eff; }
 
 .ctrl-btn {
-  padding: 10px 14px;
-  border: 1px solid #333;
-  border-radius: 8px;
-  background: #222;
-  color: #fff;
-  font-size: 13px;
-  cursor: pointer;
-  white-space: nowrap;
+  padding: 10px 14px; border: 1px solid #333; border-radius: 8px;
+  background: #222; color: #fff; font-size: 13px; cursor: pointer; white-space: nowrap;
 }
-
-#end-btn {
-  background: #3a1111;
-  border-color: #5a2222;
-  color: #ff6b6b;
-}
+#end-btn { background: #3a1111; border-color: #5a2222; color: #ff6b6b; }
+#cameraButton.video-off { opacity: 0.5; }
+#muteButton.muted { opacity: 0.5; }
 
 #status-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 4px 12px;
-  font-size: 11px;
-  color: #666;
-  background: #0a0a0a;
-  flex-shrink: 0;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 4px 12px; font-size: 11px; color: #666; background: #0a0a0a; flex-shrink: 0;
 }
 
 #status-dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  margin-right: 5px;
+  display: inline-block; width: 7px; height: 7px;
+  border-radius: 50%; margin-right: 5px;
 }
 </style>
 </head>
@@ -274,21 +142,25 @@ body {
     <div id="sop-status"></div>
   </div>
 
-  <button id="start-btn" onclick="startSession()">Start Session</button>
+  <button id="start-btn" onclick="beginSession()">Start Session</button>
 </div>
 
 <!-- SESSION SCREEN -->
 <div id="session-screen">
   <div id="viewfinder">
     <video id="camera" autoplay playsinline muted></video>
-    <canvas id="capture-canvas" style="display:none;"></canvas>
   </div>
   <div id="guidance-panel">
     <div id="step-indicator">Ready</div>
-    <div id="transcript"></div>
+    <div id="log">
+      <div id="inputContainer">
+        <input id="textInput" type="text" placeholder="Type a message...">
+        <button class="ctrl-btn" id="sendButton">Send</button>
+      </div>
+    </div>
     <div id="controls">
-      <input type="text" id="text-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendText()">
-      <button class="ctrl-btn" onclick="sendText()">Send</button>
+      <button class="ctrl-btn" id="muteButton" title="Toggle microphone">Mic</button>
+      <button class="ctrl-btn" id="cameraButton" title="Toggle camera">Cam</button>
       <button class="ctrl-btn" id="end-btn" onclick="stopSession()">End</button>
     </div>
     <div id="status-bar">
@@ -298,295 +170,537 @@ body {
   </div>
 </div>
 
+<!-- Hidden audio element for WebRTC remote audio -->
+<audio id="remoteAudio" autoplay></audio>
+
+<!--
+  Core WebRTC & Realtime logic
+  Preserved from realtime-webrtc/index.html with SkillVision adaptations
+-->
 <script>
-// --- State ---
-let ws = null;
-let frameInterval = null;
-let audioCtx = null;
-let nextPlayTime = 0;
-let selectedTaskId = '';
-let sopId = '';
-let timerInterval = null;
-let sessionStart = 0;
+    // =============================================
+    // GLOBALS (preserved from reference)
+    // =============================================
+    let pc;                      // RTCPeerConnection
+    let audioTrack;              // Local audio track
+    let videoTrack;              // Local video track
+    let dc;                      // Data channel
+    const assistantResults = {}; // Track interim/final transcripts
+    const userMessages = {};     // Track user messages per item ID
+    let assistantSpeaking = false;
 
-// --- Setup: Load task templates ---
-(async function loadTasks() {
-  try {
-    const resp = await fetch('/api/tasks');
-    const tasks = await resp.json();
-    const container = document.getElementById('task-list');
-    tasks.forEach(t => {
-      const btn = document.createElement('button');
-      btn.className = 'mode-btn';
-      btn.id = 'btn-' + t.id;
-      btn.innerHTML = t.name + '<span class="desc">' + t.step_count + ' steps — ' + t.description + '</span>';
-      btn.onclick = () => selectMode(t.id);
-      container.appendChild(btn);
+    // SkillVision state
+    let selectedTaskId = '';
+    let sopId = '';
+    let totalSteps = 0;
+    let startInstruction = '';
+    let timerInterval = null;
+    let sessionStart = 0;
+
+    // Expose to console for debugging
+    window.pc = pc;
+    window.dc = dc;
+
+    // =============================================
+    // DOM REFERENCES
+    // =============================================
+    const $ = (id) => document.getElementById(id);
+    const remoteAudioEl = $('remoteAudio');
+    const muteButton = $('muteButton');
+    const cameraButton = $('cameraButton');
+    const logEl = $("log");
+    const inputContainerEl = $("inputContainer");
+    const textInputEl = $("textInput");
+    const sendButtonEl = $("sendButton");
+
+    // =============================================
+    // SETUP: Load task templates
+    // =============================================
+    (async function loadTasks() {
+        try {
+            const resp = await fetch('/api/tasks');
+            const tasks = await resp.json();
+            const container = $('task-list');
+            tasks.forEach(t => {
+                const btn = document.createElement('button');
+                btn.className = 'mode-btn';
+                btn.id = 'btn-' + t.id;
+                btn.innerHTML = t.name + '<span class="desc">' + t.step_count + ' steps — ' + t.description + '</span>';
+                btn.onclick = () => selectMode(t.id, t.step_count);
+                container.appendChild(btn);
+            });
+        } catch (e) {
+            console.error('Failed to load tasks:', e);
+        }
+    })();
+
+    function selectMode(taskId, stepCount) {
+        selectedTaskId = taskId;
+        totalSteps = stepCount || 0;
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+        const id = taskId ? 'btn-' + taskId : 'btn-freeform';
+        const el = $(id);
+        if (el) el.classList.add('selected');
+    }
+
+    async function uploadSOP() {
+        const fileInput = $('sop-file');
+        const status = $('sop-status');
+        if (!fileInput.files.length) { status.textContent = 'No file selected'; return; }
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        status.textContent = 'Uploading...';
+        try {
+            const resp = await fetch('/api/upload-sop', { method: 'POST', body: formData });
+            const result = await resp.json();
+            sopId = result.sop_id;
+            status.textContent = 'Uploaded (' + result.char_count.toLocaleString() + ' chars)';
+        } catch (e) {
+            status.textContent = 'Upload failed: ' + e.message;
+        }
+    }
+
+    // =============================================
+    // SESSION START MESSAGES
+    // (preserved from reference — called when data channel opens)
+    // =============================================
+    function sessionStartMessages() {
+        const msg = {
+            type: "response.create",
+            response: {
+                instructions: startInstruction || "Greet the worker briefly. If you cannot see their camera feed yet, tell them.",
+                max_output_tokens: 200
+            }
+        };
+        dc.send(JSON.stringify(msg));
+        appendOrUpdateLog("Session started.", "system-message");
+    }
+
+    // =============================================
+    // HANDLE INCOMING DATA CHANNEL MESSAGES
+    // (preserved from reference with update_step addition)
+    // =============================================
+    function handleMessage(event) {
+        const message = JSON.parse(event.data);
+        const itemId = message.item_id;
+
+        switch (message.type) {
+            case "session.created":
+                const expiresAt = new Date(message?.session?.expires_at * 1000);
+                console.log(`Session created and will expire at ${expiresAt}`, message);
+                break;
+
+            case "input_audio_buffer.speech_started":
+                userMessages[itemId] = {message: ""};
+                appendOrUpdateLog(`User: ...`, "user-message", itemId);
+                break;
+
+            case "conversation.item.input_audio_transcription.completed":
+                const content = message.transcript;
+                if (content && userMessages[itemId]) {
+                    userMessages[itemId].message = content;
+                    appendOrUpdateLog(`User: ${content}`, "user-message", itemId);
+                }
+                break;
+
+            // Detect when the video stream frame was viewed
+            case "conversation.item.added":
+                const contentText = message?.item?.content?.[0]?.type;
+                if(contentText === "input_image")
+                    console.log("Image frame captured by AI");
+                else
+                    console.info(`Unhandled ${message.type} from server: `, message);
+                break;
+
+            case "response.output_text.delta":
+                if (itemId) {
+                    assistantResults[itemId] = assistantResults[itemId] || "";
+                    assistantResults[itemId] += message.delta;
+                    appendOrUpdateLog(`Assistant (interim): ${assistantResults[itemId]}`, "interim-result", itemId);
+                }
+                break;
+
+            case "response.output_audio_transcript.delta":
+                if (itemId) {
+                    assistantResults[itemId] = assistantResults[itemId] || "";
+                    assistantResults[itemId] += message.delta;
+                    appendOrUpdateLog(`Assistant (interim): ${assistantResults[itemId]}`, "interim-result", itemId);
+                }
+                break;
+
+            case "response.output_audio_transcript.done":
+                if (itemId) {
+                    assistantResults[itemId] = message.transcript;
+                    appendOrUpdateLog(`Assistant: ${message.transcript}`, "agent-message", itemId);
+                }
+                break;
+
+            case "response.function_call_arguments.done":
+                handleFunctionCall(message);
+                break;
+
+            case "output_audio_buffer.started":
+                assistantSpeaking = true;
+                break;
+
+            case "output_audio_buffer.stopped":
+                assistantSpeaking = false;
+                break;
+
+            default:
+                console.info(`Unhandled message from server: ${message.type}`, message);
+                break;
+        }
+    }
+
+    // =============================================
+    // FUNCTION CALL HANDLER (SkillVision addition)
+    // =============================================
+    function handleFunctionCall(msg) {
+        const { name, arguments: argsStr, call_id } = msg;
+
+        if (name === "end_session") {
+            console.log("Ending session based on user request");
+            stopSession();
+            return;
+        }
+
+        if (name === "update_step") {
+            try {
+                const args = JSON.parse(argsStr);
+                const stepNum = args.step_number;
+                const status = args.status;
+                const indicator = $('step-indicator');
+
+                if (status === 'completed') {
+                    indicator.textContent = 'Step ' + stepNum + (totalSteps ? ' of ' + totalSteps : '') + ' — Completed';
+                } else {
+                    indicator.textContent = 'Step ' + stepNum + (totalSteps ? ' of ' + totalSteps : '') + ' — In Progress';
+                }
+
+                // Send function call output back (required by the API)
+                if (dc && dc.readyState === 'open') {
+                    dc.send(JSON.stringify({
+                        type: 'conversation.item.create',
+                        item: {
+                            type: 'function_call_output',
+                            call_id: call_id,
+                            output: JSON.stringify({ success: true, step_number: stepNum, status: status })
+                        }
+                    }));
+                    dc.send(JSON.stringify({ type: 'response.create' }));
+                }
+            } catch (e) {
+                console.error('Failed to parse update_step args:', e);
+            }
+            return;
+        }
+
+        // Unknown function — send empty output so the model doesn't hang
+        if (dc && dc.readyState === 'open') {
+            dc.send(JSON.stringify({
+                type: 'conversation.item.create',
+                item: {
+                    type: 'function_call_output',
+                    call_id: call_id,
+                    output: JSON.stringify({ error: 'Unknown function: ' + name })
+                }
+            }));
+            dc.send(JSON.stringify({ type: 'response.create' }));
+        }
+    }
+
+    // =============================================
+    // START SESSION
+    // (preserved from reference — swapped direct OpenAI call with backend proxy)
+    // =============================================
+    async function beginSession() {
+        const startBtn = $('start-btn');
+        startBtn.disabled = true;
+
+        $('setup-screen').style.display = 'none';
+        $('session-screen').style.display = 'flex';
+        updateStatus('connecting');
+
+        // Capture the local mic + camera
+        // (preserved exactly from reference)
+        let stream;
+        try {
+            const videoConstraints = {
+                width: { ideal: 1920 },
+                height: { ideal: 1080 },
+                frameRate: { ideal: 1}
+            };
+            stream = await navigator.mediaDevices.getUserMedia({audio: true, video: videoConstraints});
+            if (!stream) {
+                console.error("Failed to get local stream");
+                stopSession();
+                return;
+            }
+            [audioTrack] = stream.getAudioTracks();
+            [videoTrack] = stream.getVideoTracks();
+            window.tracks = [audioTrack, videoTrack];
+        } catch (err) {
+            console.error("Error accessing mic/camera:", err);
+            alert('Camera and microphone access required. Please allow permissions and try again.');
+            stopSession();
+            return;
+        }
+
+        // Show local video preview
+        const videoEl = $('camera');
+        videoEl.srcObject = stream;
+
+        // Start the WebRTC session
+        // (preserved exactly from reference)
+        try {
+            // Create PeerConnection
+            pc = new RTCPeerConnection();
+
+            // On receiving remote audio track
+            pc.ontrack = (e) => remoteAudioEl.srcObject = e.streams[0];
+
+            // Add the local tracks and reference them to their source stream
+            if(audioTrack)
+                pc.addTrack(audioTrack, stream);
+            if(videoTrack)
+                pc.addTrack(videoTrack, stream);
+
+            // Create data channel
+            dc = pc.createDataChannel("oai");
+
+            // Send session instructions upon opening the data channel
+            dc.addEventListener("open", () => sessionStartMessages());
+
+            // Handle incoming messages from the server
+            dc.addEventListener("message", handleMessage);
+
+            dc.addEventListener("close", () => {
+                appendOrUpdateLog("[Connection closed]", "system-message");
+            });
+
+            // implicit setLocalDescription style
+            await pc.setLocalDescription();
+
+            // --- ADAPTED: Use backend proxy instead of direct OpenAI call ---
+            const resp = await fetch('/api/rtc-connect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sdp: pc.localDescription.sdp,
+                    task_id: selectedTaskId,
+                    sop_id: sopId,
+                }),
+            });
+
+            if (!resp.ok) {
+                let errMsg = 'SDP exchange failed';
+                try {
+                    const err = await resp.json();
+                    errMsg = err.error || errMsg;
+                } catch (_) {}
+                throw new Error(errMsg);
+            }
+
+            const result = await resp.json();
+            startInstruction = result.start_instruction || '';
+            const answerSdp = result.sdp;
+
+            await pc.setRemoteDescription({type: "answer", sdp: answerSdp});
+
+            // Wait for connection to be established before proceeding
+            // (preserved from reference)
+            await new Promise((resolve, reject) => {
+                if (pc.connectionState === 'connected') { resolve(); return; }
+                const timeout = setTimeout(() => reject(`Connection timeout. Current state: ${pc.connectionState}`), 15_000);
+                pc.addEventListener("connectionstatechange", () => {
+                    if (pc.connectionState === "connected") {
+                        clearTimeout(timeout);
+                        console.log("Peer connection established!");
+                        resolve();
+                    } else if (pc.connectionState === "failed") {
+                        clearTimeout(timeout);
+                        reject("Connection failed");
+                    }
+                });
+            });
+
+        } catch (err) {
+            console.error("Error starting session:", err);
+            appendOrUpdateLog("Error: " + err, "system-message");
+            if (pc?.connectionState !== "closed") {
+                try { pc.close(); } catch(_) {}
+            }
+            stopSession();
+            return;
+        }
+
+        // Session is live
+        updateStatus('connected');
+        sessionStart = Date.now();
+        timerInterval = setInterval(updateTimer, 1000);
+
+        if (selectedTaskId && totalSteps > 0) {
+            $('step-indicator').textContent = 'Starting...';
+        } else {
+            $('step-indicator').textContent = 'Freeform Guidance';
+        }
+
+        // Monitor connection state changes
+        pc.addEventListener('connectionstatechange', () => {
+            switch (pc.connectionState) {
+                case 'disconnected':
+                    updateStatus('reconnecting');
+                    break;
+                case 'failed':
+                    appendOrUpdateLog('[Connection lost. Please start a new session.]', 'system-message');
+                    stopSession();
+                    break;
+                case 'connected':
+                    updateStatus('connected');
+                    break;
+            }
+        });
+    }
+
+    // =============================================
+    // END SESSION
+    // (adapted from reference endSession)
+    // =============================================
+    function stopSession() {
+        console.log("Ending session...");
+
+        // Turn off mic & camera (preserved from reference)
+        if (audioTrack && audioTrack.readyState !== "ended") {
+            audioTrack.stop();
+            audioTrack = null;
+        }
+        if (videoTrack && videoTrack.readyState !== "ended") {
+            videoTrack.stop();
+            videoTrack = null;
+        }
+
+        const videoEl = $('camera');
+        videoEl.srcObject = null;
+
+        // Close data channel and peer connection
+        if (dc) { try { dc.close(); } catch(_) {} dc = null; }
+        if (pc) { try { pc.close(); } catch(_) {} pc = null; }
+
+        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+
+        startInstruction = '';
+        assistantSpeaking = false;
+
+        // Reset UI
+        $('step-indicator').textContent = 'Ready';
+        $('session-screen').style.display = 'none';
+        $('setup-screen').style.display = 'flex';
+        $('start-btn').disabled = false;
+        updateStatus('disconnected');
+
+        // Clear log entries (keep inputContainer)
+        const entries = logEl.querySelectorAll('.log-message');
+        entries.forEach(e => e.remove());
+    }
+
+    // =============================================
+    // SEND TEXT (preserved from reference)
+    // =============================================
+    function sendText() {
+        const text = textInputEl.value.trim();
+        if (!text) return;
+        if (dc && dc.readyState === "open") {
+            const message = {
+                type: "response.create",
+                response: {
+                    input: [{
+                        type: "message",
+                        role: "user",
+                        content: [{
+                            type: "input_text",
+                            text: text
+                        }],
+                    }],
+                    max_output_tokens: 700
+                }
+            };
+            dc.send(JSON.stringify(message));
+            appendOrUpdateLog("User (text): " + text, "user-message");
+            textInputEl.value = "";
+        } else {
+            appendOrUpdateLog("Data channel not open. Please wait.", "system-message");
+        }
+    }
+
+    // =============================================
+    // MEDIA CONTROLS (preserved from reference)
+    // =============================================
+
+    // Mic toggle (user's microphone)
+    let micOn = true;
+    muteButton.addEventListener('click', () => {
+        micOn = !micOn;
+        muteButton.textContent = micOn ? 'Mic' : 'Muted';
+        muteButton.classList.toggle('muted', !micOn);
+        if (audioTrack)
+            audioTrack.enabled = micOn;
     });
-  } catch (e) {
-    console.error('Failed to load tasks:', e);
-  }
-})();
 
-function selectMode(taskId) {
-  selectedTaskId = taskId;
-  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
-  const id = taskId ? 'btn-' + taskId : 'btn-freeform';
-  const el = document.getElementById(id);
-  if (el) el.classList.add('selected');
-}
+    // Camera toggle (preserved from reference)
+    let cameraOn = true;
+    cameraButton.addEventListener('click', () => {
+        cameraOn = !cameraOn;
+        cameraButton.textContent = cameraOn ? 'Cam' : 'Cam Off';
+        cameraButton.classList.toggle('video-off', !cameraOn);
+        if (videoTrack)
+            videoTrack.enabled = cameraOn; // do not fully stop so it can be resumed quickly
+    });
 
-async function uploadSOP() {
-  const fileInput = document.getElementById('sop-file');
-  const status = document.getElementById('sop-status');
-  if (!fileInput.files.length) { status.textContent = 'No file selected'; return; }
+    // Send on click or Enter press
+    sendButtonEl.addEventListener("click", sendText);
+    textInputEl.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") sendText();
+    });
 
-  const formData = new FormData();
-  formData.append('file', fileInput.files[0]);
-  status.textContent = 'Uploading...';
+    // =============================================
+    // UI HELPERS
+    // =============================================
 
-  try {
-    const resp = await fetch('/api/upload-sop', { method: 'POST', body: formData });
-    const result = await resp.json();
-    sopId = result.sop_id;
-    status.textContent = 'Uploaded (' + result.char_count.toLocaleString() + ' chars)';
-  } catch (e) {
-    status.textContent = 'Upload failed: ' + e.message;
-  }
-}
-
-// --- Camera ---
-async function startCamera() {
-  const video = document.getElementById('camera');
-  const stream = await navigator.mediaDevices.getUserMedia({
-    video: { facingMode: 'environment', width: { ideal: 768 }, height: { ideal: 768 } },
-    audio: false
-  });
-  video.srcObject = stream;
-  await video.play();
-}
-
-function stopCamera() {
-  const video = document.getElementById('camera');
-  if (video.srcObject) {
-    video.srcObject.getTracks().forEach(t => t.stop());
-    video.srcObject = null;
-  }
-}
-
-// --- Frame Capture (1 FPS) ---
-function startFrameCapture() {
-  const video = document.getElementById('camera');
-  const canvas = document.getElementById('capture-canvas');
-  canvas.width = 768;
-  canvas.height = 768;
-  const ctx = canvas.getContext('2d');
-
-  frameInterval = setInterval(() => {
-    if (!ws || ws.readyState !== WebSocket.OPEN) return;
-    if (video.readyState < 2) return; // not ready yet
-
-    ctx.drawImage(video, 0, 0, 768, 768);
-    canvas.toBlob(blob => {
-      if (!blob || !ws || ws.readyState !== WebSocket.OPEN) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64 = reader.result.split(',')[1];
-        ws.send(JSON.stringify({ type: 'video', data: base64 }));
-      };
-      reader.readAsDataURL(blob);
-    }, 'image/jpeg', 0.8);
-  }, 1000);
-}
-
-function stopFrameCapture() {
-  if (frameInterval) { clearInterval(frameInterval); frameInterval = null; }
-}
-
-// --- WebSocket ---
-let reconnectAttempts = 0;
-let sessionActive = false;
-
-function connectWebSocket() {
-  const params = new URLSearchParams();
-  if (selectedTaskId) params.set('task_id', selectedTaskId);
-  if (sopId) params.set('sop_id', sopId);
-
-  const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  ws = new WebSocket(protocol + '//' + location.host + '/ws/session?' + params);
-  ws.binaryType = 'arraybuffer';
-
-  ws.onopen = () => {
-    reconnectAttempts = 0;
-    updateStatus('connecting');
-  };
-
-  ws.onmessage = (event) => {
-    if (event.data instanceof ArrayBuffer) {
-      handleAudioChunk(event.data);
-    } else {
-      handleJsonMessage(JSON.parse(event.data));
+    /**
+     * Insert a new log entry or update an existing one (by messageId).
+     * (preserved from reference)
+     */
+    function appendOrUpdateLog(message, className = "", messageId = null) {
+        let logEntry;
+        if (messageId && $(messageId)) {
+            logEntry = $(messageId);
+            logEntry.textContent = message;
+        } else {
+            logEntry = document.createElement("div");
+            logEntry.textContent = message;
+            logEntry.classList.add("log-message");
+            if (className) logEntry.classList.add(className);
+            if (messageId) logEntry.id = messageId;
+            logEl.insertBefore(logEntry, inputContainerEl);
+        }
+        logEl.scrollTop = logEl.scrollHeight;
     }
-  };
 
-  ws.onclose = () => {
-    updateStatus('disconnected');
-    stopFrameCapture();
-    if (sessionActive) {
-      flushAudio();
-      scheduleReconnect();
+    function updateStatus(state) {
+        const dot = $('status-dot');
+        const text = $('status-text');
+        const colors = { connected: '#4CAF50', connecting: '#FFC107', reconnecting: '#FFC107', disconnected: '#f44336' };
+        dot.style.background = colors[state] || '#666';
+        text.textContent = state.charAt(0).toUpperCase() + state.slice(1);
     }
-  };
 
-  ws.onerror = (err) => console.error('WebSocket error:', err);
-}
-
-function scheduleReconnect() {
-  if (reconnectAttempts >= 5) { updateStatus('failed'); return; }
-  const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 16000);
-  reconnectAttempts++;
-  updateStatus('reconnecting');
-  setTimeout(connectWebSocket, delay);
-}
-
-// --- Audio Playback (24kHz 16-bit PCM) ---
-let gainNode = null;
-
-function initAudio() {
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
-  gainNode = audioCtx.createGain();
-  gainNode.connect(audioCtx.destination);
-  nextPlayTime = 0;
-}
-
-function handleAudioChunk(arrayBuffer) {
-  if (!audioCtx) initAudio();
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume().catch(() => {});
-  }
-
-  const int16 = new Int16Array(arrayBuffer);
-  const float32 = new Float32Array(int16.length);
-  for (let i = 0; i < int16.length; i++) {
-    float32[i] = int16[i] / 32768.0;
-  }
-
-  const audioBuffer = audioCtx.createBuffer(1, float32.length, 24000);
-  audioBuffer.getChannelData(0).set(float32);
-
-  const source = audioCtx.createBufferSource();
-  source.buffer = audioBuffer;
-  source.connect(gainNode);
-
-  const now = audioCtx.currentTime;
-  const startTime = Math.max(now, nextPlayTime);
-  source.start(startTime);
-  nextPlayTime = startTime + audioBuffer.duration;
-}
-
-function flushAudio() {
-  // Disconnect and recreate gain node to stop all scheduled sources
-  if (gainNode && audioCtx) {
-    gainNode.disconnect();
-    gainNode = audioCtx.createGain();
-    gainNode.connect(audioCtx.destination);
-  }
-  nextPlayTime = 0;
-}
-
-// --- JSON Message Handling ---
-function handleJsonMessage(msg) {
-  switch (msg.type) {
-    case 'connected':
-      updateStatus('connected');
-      startFrameCapture();
-      break;
-    case 'transcript':
-      appendTranscript(msg.text);
-      break;
-    case 'interrupted':
-      flushAudio();
-      break;
-    case 'turn_complete':
-      break;
-    case 'reconnecting':
-      updateStatus('reconnecting');
-      break;
-    case 'error':
-      appendTranscript('\n[Error: ' + msg.message + ']\n');
-      break;
-  }
-}
-
-// --- UI Updates ---
-function appendTranscript(text) {
-  const div = document.getElementById('transcript');
-  div.textContent += text;
-  div.scrollTop = div.scrollHeight;
-}
-
-function updateStatus(state) {
-  const dot = document.getElementById('status-dot');
-  const text = document.getElementById('status-text');
-  const colors = { connected: '#4CAF50', connecting: '#FFC107', reconnecting: '#FFC107', disconnected: '#f44336', failed: '#f44336' };
-  dot.style.background = colors[state] || '#666';
-  text.textContent = state.charAt(0).toUpperCase() + state.slice(1);
-}
-
-function updateTimer() {
-  const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
-  const m = Math.floor(elapsed / 60);
-  const s = elapsed % 60;
-  document.getElementById('session-timer').textContent = m + ':' + String(s).padStart(2, '0');
-}
-
-function sendText() {
-  const input = document.getElementById('text-input');
-  const text = input.value.trim();
-  if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
-  ws.send(JSON.stringify({ type: 'text', data: text }));
-  appendTranscript('\n[You]: ' + text + '\n');
-  input.value = '';
-}
-
-// --- Session Lifecycle ---
-async function startSession() {
-  document.getElementById('setup-screen').style.display = 'none';
-  const sessionScreen = document.getElementById('session-screen');
-  sessionScreen.style.display = 'flex';
-
-  try {
-    await startCamera();
-  } catch (e) {
-    alert('Camera access denied. Please allow camera permissions and try again.');
-    stopSession();
-    return;
-  }
-
-  sessionActive = true;
-  initAudio();
-  connectWebSocket();
-
-  sessionStart = Date.now();
-  timerInterval = setInterval(updateTimer, 1000);
-}
-
-function stopSession() {
-  sessionActive = false;
-  stopFrameCapture();
-  stopCamera();
-  if (ws) { ws.onclose = null; ws.close(); ws = null; }
-  if (audioCtx) { audioCtx.close(); audioCtx = null; gainNode = null; }
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-
-  nextPlayTime = 0;
-  reconnectAttempts = 0;
-  document.getElementById('transcript').textContent = '';
-  document.getElementById('step-indicator').textContent = 'Ready';
-  document.getElementById('session-screen').style.display = 'none';
-  document.getElementById('setup-screen').style.display = 'flex';
-  updateStatus('disconnected');
-}
+    function updateTimer() {
+        const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+        const m = Math.floor(elapsed / 60);
+        const s = elapsed % 60;
+        $('session-timer').textContent = m + ':' + String(s).padStart(2, '0');
+    }
 </script>
 </body>
 </html>

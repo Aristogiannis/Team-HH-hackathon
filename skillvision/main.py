@@ -1,24 +1,23 @@
 from __future__ import annotations
 
-import asyncio
-import base64
 import io
 import json
 import logging
 import sys
 import uuid
 from pathlib import Path
+from typing import Any
 
 # Ensure bare imports work regardless of working directory
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File
-from fastapi.responses import HTMLResponse, JSONResponse
+import httpx
+from fastapi import FastAPI, UploadFile, File, Request
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 
 from config import settings
-from gemini_session import GeminiLiveSession
-from prompts import build_structured_prompt, build_freeform_prompt
-from task_templates import list_templates
+from prompts import build_structured_prompt, build_freeform_prompt, build_start_instruction
+from task_templates import list_templates, get_template
 
 logging.basicConfig(
     level=logging.INFO,
@@ -30,6 +29,53 @@ app = FastAPI(title="SkillVision")
 
 # In-memory SOP storage (key: sop_id, value: extracted text)
 sop_store: dict[str, str] = {}
+
+OPENAI_REALTIME_URL = "https://api.openai.com/v1/realtime/calls"
+
+
+# --- Tool Definitions ---
+
+
+def build_tool_definitions(task_id: str) -> list[dict[str, Any]]:
+    tools: list[dict[str, Any]] = [
+        {
+            "type": "function",
+            "name": "end_session",
+            "description": "The user wants to end the guidance session.",
+            "parameters": {},
+        },
+    ]
+    if task_id:
+        template = get_template(task_id)
+        if template:
+            total_steps = len(template["steps"])
+            tools.append(
+                {
+                    "type": "function",
+                    "name": "update_step",
+                    "description": (
+                        "Call this when you begin working on a step or when you "
+                        "visually confirm a step is completed and the worker should "
+                        "advance. This updates the on-screen step indicator."
+                    ),
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "step_number": {
+                                "type": "integer",
+                                "description": f"The step number (1 to {total_steps}).",
+                            },
+                            "status": {
+                                "type": "string",
+                                "enum": ["in_progress", "completed"],
+                                "description": "Whether the step is starting or has been completed.",
+                            },
+                        },
+                        "required": ["step_number", "status"],
+                    },
+                }
+            )
+    return tools
 
 
 # --- REST Endpoints ---
@@ -71,89 +117,96 @@ async def upload_sop(file: UploadFile = File(...)):
     return JSONResponse(content={"sop_id": sop_id, "char_count": len(text)})
 
 
-# --- WebSocket Endpoint ---
+# --- WebRTC SDP Exchange ---
 
 
-@app.websocket("/ws/session")
-async def websocket_session(
-    websocket: WebSocket, task_id: str = "", sop_id: str = ""
-):
-    await websocket.accept()
-    logger.info("WebSocket connected: task_id=%r, sop_id=%r", task_id, sop_id)
+@app.post("/api/rtc-connect")
+async def rtc_connect(request: Request):
+    """Proxy the SDP exchange with OpenAI to keep the API key server-side."""
+    body = await request.json()
+    browser_sdp = body.get("sdp", "")
+    task_id = body.get("task_id", "")
+    sop_id = body.get("sop_id", "")
 
-    # Build system instruction
+    if not browser_sdp:
+        return JSONResponse(
+            content={"error": "Missing SDP offer"},
+            status_code=400,
+        )
+
+    # Build system prompt
     sop_content = sop_store.get(sop_id) if sop_id else None
     if task_id:
-        system_instruction = build_structured_prompt(task_id, sop_content)
+        instructions = build_structured_prompt(task_id, sop_content)
     else:
-        system_instruction = build_freeform_prompt(sop_content)
+        instructions = build_freeform_prompt(sop_content)
 
-    # Create and connect Gemini session
-    gemini = GeminiLiveSession(system_instruction)
-    try:
-        await gemini.connect()
-    except Exception as e:
-        logger.error("Failed to connect to Gemini: %s", e)
-        await websocket.send_json({"type": "error", "message": str(e)})
-        await websocket.close()
-        return
+    # Build start instruction for the initial greeting
+    start_instruction = build_start_instruction(task_id)
 
-    await websocket.send_json({"type": "connected"})
-    done = asyncio.Event()
+    # Build session config
+    session_config = {
+        "type": "realtime",
+        "model": settings.openai_model,
+        "instructions": instructions,
+        "audio": {
+            "input": {
+                "transcription": {
+                    "model": "whisper-1",
+                }
+            },
+            "output": {
+                "voice": settings.voice,
+            },
+        },
+        "tools": build_tool_definitions(task_id),
+        "tracing": "auto",
+    }
 
-    async def browser_to_gemini():
-        """Relay messages from browser to Gemini."""
+    logger.info(
+        "RTC connect: task_id=%r, sop=%s, instructions=%d chars",
+        task_id,
+        "yes" if sop_content else "no",
+        len(instructions),
+    )
+
+    # POST to OpenAI Realtime API
+    async with httpx.AsyncClient() as client:
         try:
-            while True:
-                raw = await websocket.receive_text()
-                msg = json.loads(raw)
-                msg_type = msg.get("type")
+            resp = await client.post(
+                OPENAI_REALTIME_URL,
+                headers={"Authorization": f"Bearer {settings.openai_api_key}"},
+                files={
+                    "sdp": (None, browser_sdp),
+                    "session": (None, json.dumps(session_config)),
+                },
+                timeout=15.0,
+            )
+        except httpx.TimeoutException:
+            return JSONResponse(
+                content={"error": "Timeout connecting to OpenAI"},
+                status_code=504,
+            )
+        except httpx.RequestError as e:
+            return JSONResponse(
+                content={"error": f"Failed to reach OpenAI: {e}"},
+                status_code=502,
+            )
 
-                if msg_type == "video":
-                    jpeg_bytes = base64.b64decode(msg.get("data", ""))
-                    await gemini.send_video_frame(jpeg_bytes)
-                elif msg_type == "text":
-                    await gemini.send_text(msg.get("data", ""))
-        except WebSocketDisconnect:
-            logger.info("Browser disconnected")
-        except Exception as e:
-            logger.error("browser_to_gemini error: %s", e)
-        finally:
-            done.set()
+    if resp.status_code not in (200, 201):
+        logger.error("OpenAI error %d: %s", resp.status_code, resp.text)
+        return JSONResponse(
+            content={"error": resp.text},
+            status_code=resp.status_code,
+        )
 
-    async def gemini_to_browser():
-        """Relay responses from Gemini to browser."""
-        try:
-            async for response in gemini.receive_responses():
-                if done.is_set():
-                    break
-                if response["type"] == "audio":
-                    await websocket.send_bytes(response["data"])
-                elif response["type"] == "transcript":
-                    await websocket.send_json(
-                        {"type": "transcript", "text": response["text"]}
-                    )
-                elif response["type"] == "interrupted":
-                    await websocket.send_json({"type": "interrupted"})
-                elif response["type"] == "turn_complete":
-                    await websocket.send_json({"type": "turn_complete"})
-                elif response["type"] == "go_away":
-                    await websocket.send_json({"type": "reconnecting"})
-        except WebSocketDisconnect:
-            logger.info("Browser disconnected during receive")
-        except Exception as e:
-            if not done.is_set():
-                logger.error("gemini_to_browser error: %s", e)
-        finally:
-            done.set()
-
-    try:
-        await asyncio.gather(browser_to_gemini(), gemini_to_browser())
-    except Exception as e:
-        logger.error("Session error: %s", e)
-    finally:
-        await gemini.close()
-        logger.info("Session cleaned up")
+    # Return the SDP answer + start instruction as JSON
+    return JSONResponse(
+        content={
+            "sdp": resp.text,
+            "start_instruction": start_instruction,
+        }
+    )
 
 
 if __name__ == "__main__":
