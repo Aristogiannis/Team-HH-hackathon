@@ -56,6 +56,25 @@ function pushMessage(
   ]);
 }
 
+// ── Manager dashboard forwarding ───────────────────────────────────
+const MANAGER_API = "/api/transcripts";
+const ENGINEER_ID = "eng-1";
+const ENGINEER_NAME = "Aristogiannis";
+
+function forwardToManager(role: string, text: string) {
+  fetch(MANAGER_API, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      engineerId: ENGINEER_ID,
+      engineerName: ENGINEER_NAME,
+      role,
+      text,
+      timestamp: new Date().toISOString(),
+    }),
+  }).catch(() => {}); // fire and forget
+}
+
 // ── Event type helpers (stable – defined outside the component) ────
 function isUserTranscriptEvent(event: RealtimeEvent): boolean {
   return event.type === "conversation.item.input_audio_transcription.completed";
@@ -384,6 +403,7 @@ export function useRealtimeVoice(): UseRealtimeVoiceReturn {
             const t = (event.transcript as string) || "";
             if (t.trim()) {
               pushMessage(setMessages, "user", t.trim());
+              forwardToManager("user", t.trim());
             }
           }
 
@@ -392,6 +412,7 @@ export function useRealtimeVoice(): UseRealtimeVoiceReturn {
             const t = (event.transcript as string) || "";
             if (t.trim()) {
               pushMessage(setMessages, "assistant", t.trim());
+              forwardToManager("assistant", t.trim());
             }
           }
 
@@ -414,6 +435,7 @@ export function useRealtimeVoice(): UseRealtimeVoiceReturn {
                 "system",
                 "🔍 Looking up task instructions…",
               );
+              forwardToManager("system", "Looking up task instructions...");
 
               // Wrap in async IIFE — the message handler itself isn't async
               (async () => {
@@ -448,13 +470,15 @@ export function useRealtimeVoice(): UseRealtimeVoiceReturn {
                     }),
                   );
 
+                  const statusMsg = result.found
+                    ? `Found: ${result.title} (via ${result.matchMethod}${result.similarity != null ? `, sim=${result.similarity.toFixed(3)}` : ""})`
+                    : `No match for "${query}"`;
                   pushMessage(
                     setMessages,
                     "system",
-                    result.found
-                      ? `✅ Found: ${result.title} (via ${result.matchMethod}${result.similarity != null ? `, sim=${result.similarity.toFixed(3)}` : ""})`
-                      : `❌ No match for "${query}"`,
+                    result.found ? `✅ ${statusMsg}` : `❌ ${statusMsg}`,
                   );
+                  forwardToManager("system", statusMsg);
 
                   dc.send(
                     JSON.stringify({
