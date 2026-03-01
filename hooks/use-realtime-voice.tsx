@@ -395,7 +395,7 @@ export function useRealtimeVoice(): UseRealtimeVoiceReturn {
             }
           }
 
-          // Handle function calls
+          // Handle function calls (async — searchTaskDocs calls the embed API)
           if (isFunctionCallEvent(event)) {
             const {
               name,
@@ -414,28 +414,91 @@ export function useRealtimeVoice(): UseRealtimeVoiceReturn {
                 "system",
                 "🔍 Looking up task instructions…",
               );
-              try {
-                const args = JSON.parse(argsStr);
-                const result = searchTaskDocs(args.task_description);
 
-                dc.send(
-                  JSON.stringify({
-                    type: "conversation.item.create",
-                    item: {
-                      type: "function_call_output",
-                      call_id: callId,
-                      output: JSON.stringify(result),
-                    },
-                  }),
+              // Wrap in async IIFE — the message handler itself isn't async
+              (async () => {
+                let args: { task_description?: string } = {};
+                try {
+                  args = JSON.parse(argsStr);
+                } catch (parseErr) {
+                  console.error(
+                    "[realtime] Failed to parse tool args:",
+                    argsStr,
+                    parseErr,
+                  );
+                }
+
+                const query = args.task_description ?? "";
+                console.log(
+                  "[realtime] get_task_steps called with:",
+                  JSON.stringify(query),
                 );
 
-                // Trigger model to continue speaking with the result
-                dc.send(JSON.stringify({ type: "response.create" }));
-              } catch (err) {
-                console.error("[realtime] Function call error:", err);
-              } finally {
-                setTimeout(() => setToolCall(null), 2000);
-              }
+                try {
+                  const result = await searchTaskDocs(query);
+                  console.log(
+                    "[realtime] searchTaskDocs result:",
+                    JSON.stringify({
+                      found: result.found,
+                      title: result.title,
+                      matchMethod: result.matchMethod,
+                      similarity: result.similarity,
+                      stepsLength: result.steps?.length,
+                      alternatives: result.alternatives,
+                    }),
+                  );
+
+                  pushMessage(
+                    setMessages,
+                    "system",
+                    result.found
+                      ? `✅ Found: ${result.title} (via ${result.matchMethod}${result.similarity != null ? `, sim=${result.similarity.toFixed(3)}` : ""})`
+                      : `❌ No match for "${query}"`,
+                  );
+
+                  dc.send(
+                    JSON.stringify({
+                      type: "conversation.item.create",
+                      item: {
+                        type: "function_call_output",
+                        call_id: callId,
+                        output: JSON.stringify(result),
+                      },
+                    }),
+                  );
+
+                  // Trigger model to continue speaking with the result
+                  dc.send(JSON.stringify({ type: "response.create" }));
+                } catch (err) {
+                  console.error("[realtime] Function call error:", err);
+                  // Send error back to the model so it can recover gracefully
+                  const errorResult = {
+                    found: false,
+                    steps: `Internal error running search for "${query}". Ask the user to rephrase their request.`,
+                    error: String(err),
+                  };
+                  try {
+                    dc.send(
+                      JSON.stringify({
+                        type: "conversation.item.create",
+                        item: {
+                          type: "function_call_output",
+                          call_id: callId,
+                          output: JSON.stringify(errorResult),
+                        },
+                      }),
+                    );
+                    dc.send(JSON.stringify({ type: "response.create" }));
+                  } catch (sendErr) {
+                    console.error(
+                      "[realtime] Failed to send error output:",
+                      sendErr,
+                    );
+                  }
+                } finally {
+                  setTimeout(() => setToolCall(null), 2000);
+                }
+              })();
             }
           }
 
